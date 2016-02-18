@@ -3,12 +3,15 @@
 #include <stdint.h>
 #include <malloc.h>
 
+#define LEFT 1
+#define RIGHT 0
+
 
 
 #pragma pack(push, 2)
 
 typedef struct bmp_header_t {
-	uint16_t bfType; 		/* little/big-endian*/
+	uint16_t bfType; 		/* 424D/4D42 */
 	uint32_t bfSize; 		/* file size in bytes*/
 	uint32_t bfReserved; 		/* must be 0*/
 	uint32_t bOffBits; 		/* pixel data location from header*/
@@ -137,12 +140,21 @@ void rotate_bmp(image_t* image) {
 	free(new_image);
 }
 
-error open_rotate_save(char* image_file_name, char* new_file_name) {
+error open_rotate_save(char* image_file_name, char* new_file_name, int side, size_t rot_num) {
+	size_t iter;
 	image_t* image = (image_t*) malloc(sizeof(image_t));
 	FILE* file = fopen(image_file_name, "rb");
 	if(!file) return cant_open;
 	if(deserialize_bmp(file, image) == not_bmp) return not_bmp;
-	rotate_bmp(image);
+	for(iter = 0; iter < rot_num; iter++) {	
+		if(side == RIGHT)
+			rotate_bmp(image);
+		if(side == LEFT) {
+			rotate_bmp(image);
+			rotate_bmp(image);
+			rotate_bmp(image);
+		}
+	}
 	if(serialize_bmp(image, new_file_name) == cant_create) return cant_create;
 	fclose(file);
 	free(image);
@@ -151,8 +163,8 @@ error open_rotate_save(char* image_file_name, char* new_file_name) {
 	
 	
 
-int rotate(char* file_name) {
-	switch(open_rotate_save(file_name, "image1.bmp")) {
+int rotate(char* file_name, int side, size_t rot_num, char* output) {
+	switch(open_rotate_save(file_name, output, side, rot_num)) {
 		case 0: 
 			printf("%s", "Everything is OK, your file ready\n"); 
 			return 1;

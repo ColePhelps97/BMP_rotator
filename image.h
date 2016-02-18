@@ -1,6 +1,9 @@
 #ifndef _IMAGE_H_
 #define _IMAGE_H_
 #include <stdint.h>
+#define LEFT 1
+#define RIGHT 0
+
 
 #pragma pack(push, 2)
 
@@ -48,7 +51,6 @@ typedef enum {
 } error;
 
 
-
 error deserialize_bmp(FILE* const image_file, image_t* image);
 
 error serialize_bmp(image_t* image, char* file_name);
@@ -57,8 +59,8 @@ void rotate_pixels(image_t* image);
 
 void rotate_bmp(image_t* image);
 
-error open_rotate_save(char* image_file_name, char* new_file_name);
+error open_rotate_save(char* image_file_name, char* new_file_name, int side, size_t rot_num);
 
-int rotate(char* file_name);
+int rotate(char* file_name, int side, size_t rot_num, char* output);
 
 #endif
